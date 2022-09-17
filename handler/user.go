@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"qlambi/auth"
 	"qlambi/helper"
 	"qlambi/user"
 
@@ -11,10 +12,11 @@ import (
 
 type userHandler struct {
 	userService user.Service
+	authService auth.Service
 }
 
-func UserHandler(userService user.Service) *userHandler {
-	return &userHandler{userService}
+func UserHandler(userService user.Service, authService auth.Service) *userHandler {
+	return &userHandler{userService, authService}
 }
 
 func (h *userHandler) RegisterUser(c *gin.Context) {
@@ -37,7 +39,15 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	userReponse := user.FormatUser(newUser, "token")
+	token, err := h.authService.GenerateToken(newUser.Id)
+
+	if err != nil {
+		response := helper.APIResponse(err.Error(), http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	userReponse := user.FormatUser(newUser, token)
 
 	response := helper.APIResponse("Akun berhasil dibuat", http.StatusOK, "success", userReponse)
 	c.JSON(http.StatusOK, response)
@@ -66,7 +76,14 @@ func (h *userHandler) Login(c *gin.Context) {
 		return
 	}
 
-	formatter := user.FormatUser(loggedinUser, "token")
+	token, err := h.authService.GenerateToken(loggedinUser.Id)
+	if err != nil {
+		response := helper.APIResponse(err.Error(), http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := user.FormatUser(loggedinUser, token)
 
 	response := helper.APIResponse("Successfuly loggedin", http.StatusOK, "success", formatter)
 

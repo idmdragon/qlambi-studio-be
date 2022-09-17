@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"qlambi/auth"
 	"qlambi/handler"
 	"qlambi/user"
 
@@ -20,7 +21,9 @@ func main() {
 
 	userRepository := user.UserRepository((db))
 	userService := user.UserService(userRepository)
-	userHandler := handler.UserHandler(userService)
+	authService := auth.AuthService()
+
+	userHandler := handler.UserHandler(userService, authService)
 
 	router := gin.Default()
 	api := router.Group("/api/v1")

@@ -16,7 +16,7 @@ func FormatUser(user User, token string) UserFormatter {
 		Id:        user.Id,
 		Name:      user.Name,
 		Email:     user.Email,
-		Token:     "asdasd",
+		Token:     token,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}
