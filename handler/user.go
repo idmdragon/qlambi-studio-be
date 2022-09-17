@@ -17,7 +17,6 @@ func UserHandler(userService user.Service) *userHandler {
 }
 
 func (h *userHandler) RegisterUser(c *gin.Context) {
-	//get Input From User
 	var input user.RegisterUserInput
 
 	err := c.ShouldBindJSON(&input)
@@ -31,7 +30,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	}
 	newUser, err := h.userService.RegisterUser(input)
 
-	if true {
+	if err != nil {
 		response := helper.APIResponse("Akun gagal dibuat", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
@@ -41,4 +40,35 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 
 	response := helper.APIResponse("Akun berhasil dibuat", http.StatusOK, "success", userReponse)
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *userHandler) Login(c *gin.Context) {
+	var input user.LoginInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Login failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	loggedinUser, err := h.userService.LoginUser(input)
+
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+
+		response := helper.APIResponse("Login failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	formatter := user.FormatUser(loggedinUser, "token")
+
+	response := helper.APIResponse("Successfuly loggedin", http.StatusOK, "success", formatter)
+
+	c.JSON(http.StatusOK, response)
+
 }

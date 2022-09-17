@@ -20,25 +20,13 @@ func main() {
 
 	userRepository := user.UserRepository((db))
 	userService := user.UserService(userRepository)
-
 	userHandler := handler.UserHandler(userService)
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
 
 	api.POST("/users", userHandler.RegisterUser)
+	api.POST("/sessions", userHandler.Login)
+
 	router.Run()
 }
-
-/*
-User
-	0. id
-	1. name
-	2. email
-	3. password_hash
-	4. avatar_file_name
-Product
-Transactions
-Testimonial
-Portofolio
-*/
